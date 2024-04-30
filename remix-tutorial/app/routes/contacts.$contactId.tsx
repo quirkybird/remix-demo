@@ -1,7 +1,7 @@
 import { json } from "@remix-run/node";
-import { Form, useLoaderData,useFetcher } from "@remix-run/react";
+import { Form, useLoaderData, useFetcher } from "@remix-run/react";
 import type { FunctionComponent } from "react";
-import type { LoaderFunctionArgs, ActionFunctionArgs,} from "@remix-run/node";
+import type { LoaderFunctionArgs, ActionFunctionArgs } from "@remix-run/node";
 import invariant from "tiny-invariant";
 
 import type { ContactRecord } from "../data";
@@ -16,16 +16,13 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
   return json({ contact });
 };
 
-export const action = async ({
-    params,
-    request,
-  }: ActionFunctionArgs) => {
-    invariant(params.contactId, "Missing contactId param");
-    const formData = await request.formData();
-    return updateContact(params.contactId, {
-      favorite: formData.get("favorite") === "true",
-    });
-  };
+export const action = async ({ params, request }: ActionFunctionArgs) => {
+  invariant(params.contactId, "Missing contactId param");
+  const formData = await request.formData();
+  return updateContact(params.contactId, {
+    favorite: formData.get("favorite") === "true",
+  });
+};
 
 export default function Contact() {
   const { contact } = useLoaderData<typeof loader>();
@@ -90,8 +87,10 @@ export default function Contact() {
 const Favorite: FunctionComponent<{
   contact: Pick<ContactRecord, "favorite">;
 }> = ({ contact }) => {
-    const fetcher = useFetcher();
-  const favorite = contact.favorite;
+  const fetcher = useFetcher();
+  const favorite = fetcher.formData
+    ? fetcher.formData.get("favorite") === "true"
+    : contact.favorite;
 
   return (
     <fetcher.Form method="post">
